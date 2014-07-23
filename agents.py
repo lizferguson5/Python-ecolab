@@ -8,8 +8,6 @@ class fox:
     minfood = 0                # minimum food threshhold before agent dies
     foodbrd = 10               # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
-    dead = False                # Is this agent dead or alive?
-    has_been_eaten = False       # Has this agent been eaten?
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes vary on a per-fox basis
         self.age = age
@@ -18,7 +16,8 @@ class fox:
         self.old_pos = pos  # Temporary, to emulate behaviour of MATLAB original
         self.speed = speed
         self.last_breed = last_breed
-        # messages dictionary
+        self.dead = False                # Is this agent dead or alive?
+        self.has_been_eaten = False       # Has this agent been eaten?
         
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.format(self.age, self.food, self.pos, self.speed, self.last_breed)
@@ -59,14 +58,14 @@ class fox:
             index = index + 1
         return(np.sqrt(min_distance), min_index)
 
-    def eat(self, rabbits):
+    def eat(self, env):
         """
-        eaten = eat(self,rabbits)
+        eaten = eat(self,env)
 
         eaten is True if the fox eats. False otherwise
         """
         eaten = False
-        (distance, nearest_rabbit_ind) = self.find_food(rabbits)
+        (distance, nearest_rabbit_ind) = self.find_food(env.agents)
         # probability that fox will kill rabbit is ratio of speed to distance
 
         if distance <= self.speed and nearest_rabbit_ind is not -1:
@@ -74,8 +73,8 @@ class fox:
 
              if pk > rand():
 
-                self.pos = rabbits[nearest_rabbit_ind].old_pos  # Move to same position as rabbit
-                rabbits[nearest_rabbit_ind].has_been_eaten = True  # kill rabbit
+                self.pos = env.agents[nearest_rabbit_ind].old_pos  # Move to same position as rabbit
+                env.agents[nearest_rabbit_ind].has_been_eaten = True  # kill rabbit
 
                 self.food = self.food + 2
                 eaten = True
@@ -115,8 +114,6 @@ class rabbit:
     minfood = 0              # minimum food threshhold before agent dies
     foodbrd = 10             # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
-    dead = False                # Is this agent dead or alive?
-    has_been_eaten = False     # Has this agent been eaten?
 
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes apply to individual rabbits
@@ -129,6 +126,9 @@ class rabbit:
         self.cpos = np.round(pos).astype(np.int) - 1
         self.speed = speed
         self.last_breed = last_breed
+
+        self.dead = False                # Is this agent dead or alive?
+        self.has_been_eaten = False     # Has this agent been eaten?
 
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.\

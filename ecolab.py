@@ -7,15 +7,12 @@ import copy
 def agent_solve_matlab(env):
     new_agents = []  # List of new agents created for this iteration
     
-    # Created to emulate the possibly buggy behaviour in the MATLAB version
+    # Update old_pos in each agent so that it contains position from previous iteration
     for agent in env.agents:
         agent.old_pos = agent.pos
 
     for agent in env.agents:
-            if isinstance(agent,rabbit):
-                eaten = agent.eat(env)
-            else:
-                eaten = agent.eat(env.agents) # emulates original behaviour
+            eaten = agent.eat(env)
 
             # If the agent hasn't eaten, migrate
             if not eaten:
@@ -36,9 +33,8 @@ def agent_solve_matlab(env):
     env.agents = [a for a in env.agents if not a.dead and not a.has_been_eaten] 
 
 def ecolab_matlab(size, nr, nf, steps):
-    #Works on a single list of rabbits and foxes like MATLAB did
     env = environment.environment(size)
-    env.create_agents(nr,nf)
+    env.create_agents(nr,nf,'joined')
 
     history = np.zeros((2,steps))
 

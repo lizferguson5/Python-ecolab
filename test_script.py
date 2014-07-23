@@ -2,7 +2,7 @@ from agents import rabbit,fox
 from environment import environment
 from scipy.io import loadmat
 import ecolab
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -13,10 +13,10 @@ np.random.seed(1)
 matlab_results = loadmat('fox_rabbit_20_60_5.mat')
 matlab_data = matlab_results['the_data']
 
-(agents,env,history) = ecolab.ecolab_matlab(size=20,nr=60,nf=5,steps=201)
+(agents,env,history) = ecolab.ecolab_matlab(size=30,nr=120,nf=5,steps=1000)
 
-if all(history[0]==matlab_data[0]) and all(history[1]==matlab_data[1]):
-    print('MATLAB agrees with Python')
+#if all(history[0]==matlab_data[0]) and all(history[1]==matlab_data[1]):
+#    print('MATLAB agrees with Python')
 # plt.plot(history[0,:])
 # plt.plot(history[1,:])
 # plt.show()

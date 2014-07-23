@@ -74,15 +74,15 @@ class FoxTests(unittest.TestCase):
         self.failUnless(fox.dead)
 
     def testEat(self):
-        env= environment.environment(5)
+        env = environment.environment(5)
         #Create a very fast fox
-        fox= agents.fox(age=2,food=10,pos=[1.5,1.5],speed=10,last_breed=7)
+        fox = agents.fox(age=2,food=10,pos=[1.5,1.5],speed=10,last_breed=7)
         #create a rabbit very close to it
-        rabbit_list = [agents.rabbit(age=2,food=10,pos=[1.52,1.52],speed=10,last_breed=7)]
+        env.agents = [agents.rabbit(age=2,food=10,pos=[1.52,1.52],speed=10,last_breed=7)]
         #Its almost certain that this fox ate this rabbit
-        fox.eat(rabbit_list)
+        fox.eat(env)
         #Doex rabbit know that its been eaten?
-        self.failUnless(rabbit_list[0].has_been_eaten)
+        self.failUnless(env.agents[0].has_been_eaten)
         #TODO - Make sure a slow fox doesn't eat a rabbit very far away
 
     def testBreed1(self):
