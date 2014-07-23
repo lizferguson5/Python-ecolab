@@ -8,6 +8,7 @@ class fox:
     minfood = 0                # minimum food threshhold before agent dies
     foodbrd = 10               # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
+    num_foxes = 0             # Number of alive foxes
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes vary on a per-fox basis
         self.age = age
@@ -18,6 +19,9 @@ class fox:
         self.last_breed = last_breed
         self.dead = False                # Is this agent dead or alive?
         self.has_been_eaten = False       # Has this agent been eaten?
+
+        # We've created a new instance so increment the counter
+        self.__class__.num_foxes = self.__class__.num_foxes + 1
         
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.format(self.age, self.food, self.pos, self.speed, self.last_breed)
@@ -105,6 +109,8 @@ class fox:
         # they are older than max_age
         if self.food <= self.minfood or self.age > self.maxage:
             self.dead = True
+        self.__class__.num_foxes = self.__class__.num_foxes - 1 
+
 
 
 class rabbit:
@@ -114,7 +120,7 @@ class rabbit:
     minfood = 0              # minimum food threshhold before agent dies
     foodbrd = 10             # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
-
+    num_rabbits = 0         # Number of alive rabbits
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes apply to individual rabbits
         self.age = age
@@ -128,7 +134,10 @@ class rabbit:
         self.last_breed = last_breed
 
         self.dead = False                # Is this agent dead or alive?
-        self.has_been_eaten = False     # Has this agent been eaten?
+        self.has_been_eaten = False      # Has this agent been eaten?
+
+        # We've created a new instance so increment the counter
+        self.__class__.num_rabbits = self.__class__.num_rabbits + 1 
 
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.\
@@ -160,6 +169,7 @@ class rabbit:
         # are older than maxage
         if self.food <= self.minfood or self.age > self.maxage:
             self.dead = True
+        self.__class__.num_rabbits = self.__class__.num_rabbits - 1 
 
     def eat(self, env):
         # obtain environment food level at current location
