@@ -225,7 +225,6 @@ class RabbitTests(unittest.TestCase):
         
         self.env= environment.environment(10)
         self.env.food= numpy.zeros((10,10)) #Eat all the food
-
         rabbit= agents.rabbit(age=2,food=10,pos=[9.8,9.8],speed=2,last_breed=7)
         rabbit.migrate(self.env)
         
