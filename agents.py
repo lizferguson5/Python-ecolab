@@ -18,6 +18,8 @@ class fox:
         self.old_pos = pos  # Temporary, to emulate behaviour of MATLAB original
         self.speed = speed
         self.last_breed = last_breed
+        # messages dictionary
+        
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.format(self.age, self.food, self.pos, self.speed, self.last_breed)
         return(out)
@@ -28,7 +30,6 @@ class fox:
             new = fox(age=0, food=self.food / 2.0, pos=self.pos,  speed=self.speed, last_breed=0)
             self.food = self.food / 2.0
             self.last_breed = 0
-
         else:
             self.last_breed = self.last_breed + 1
         self.age = self.age + 1

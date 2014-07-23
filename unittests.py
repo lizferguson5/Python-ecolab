@@ -22,17 +22,17 @@ class MATLABTest1(unittest.TestCase):
     def setUp(self):
         numpy.random.seed(1)
         self.env = environment.environment(10) #Create a 5 x 5 environment
-        (self.rabbits,self.foxes) = ecolab.create_agents(30,2,self.env)
+        self.env.create_agents(30,2)
 
     def testRabbit1(self):
         #Ensures that the first rabbit in the rabbits list has the same properties 
         #as the MATLAB model
-        self.failUnlessAlmostEqual(self.rabbits[0].pos[0] ,4.7532, places=4)
-        self.failUnlessAlmostEqual(self.rabbits[0].pos[1] ,1.8851, places=4)
-        self.failUnlessEqual(self.rabbits[0].age,1)  
-        self.failUnlessEqual(self.rabbits[0].food,31)
-        self.failUnlessEqual(self.rabbits[0].speed,2)
-        self.failUnlessEqual(self.rabbits[0].last_breed,7)
+        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[0] ,4.7532, places=4)
+        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[1] ,1.8851, places=4)
+        self.failUnlessEqual(self.env.rabbits[0].age,1)  
+        self.failUnlessEqual(self.env.rabbits[0].food,31)
+        self.failUnlessEqual(self.env.rabbits[0].speed,2)
+        self.failUnlessEqual(self.env.rabbits[0].last_breed,7)
 
     def testFoxMigrate(self):
         numpy.random.seed(1)
