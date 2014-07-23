@@ -4,18 +4,18 @@ import numpy as np
 from numpy.random import rand
 import copy
 
-def agent_solve_matlab(agent_list,env):
+def agent_solve_matlab(env):
     new_agents = []  # List of new agents created for this iteration
     
     # Created to emulate the possibly buggy behaviour in the MATLAB version
-    for agent in agent_list:
+    for agent in env.agents:
         agent.old_pos = agent.pos
 
-    for agent in agent_list:
+    for agent in env.agents:
             if isinstance(agent,rabbit):
                 eaten = agent.eat(env)
             else:
-                eaten = agent.eat(agent_list) # emulates original behaviour
+                eaten = agent.eat(env.agents) # emulates original behaviour
 
             # If the agent hasn't eaten, migrate
             if not eaten:
@@ -30,30 +30,25 @@ def agent_solve_matlab(agent_list,env):
                     new_agents.append(new)
             
     # Add new agents to list
-    agent_list.extend(new_agents)
+    env.agents.extend(new_agents)
             
     # Remove agents that are ready to die
-    agent_list = [a for a in agent_list if not a.dead and not a.has_been_eaten] 
-
-    return(agent_list)
+    env.agents = [a for a in env.agents if not a.dead and not a.has_been_eaten] 
 
 def ecolab_matlab(size, nr, nf, steps):
     #Works on a single list of rabbits and foxes like MATLAB did
     env = environment.environment(size)
     env.create_agents(nr,nf)
 
-    env.rabbits.extend(env.foxes)
-    agents = env.rabbits
-
     history = np.zeros((2,steps))
 
     for n_it in range(steps):
-        rabbits = [a for a in agents if isinstance(a,rabbit)]
-        foxes = [a for a in agents if isinstance(a,fox)]
+        rabbits = [a for a in env.agents if isinstance(a,rabbit)]
+        foxes = [a for a in env.agents if isinstance(a,fox)]
 
         history[0,n_it] = len(rabbits)
         history[1,n_it] = len(foxes)
 
-        (agents) = agent_solve_matlab(agents,env)  
+        agent_solve_matlab(env)  
 
-    return(agents,env,history)
+    return(env.agents,env,history)

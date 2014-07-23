@@ -22,7 +22,7 @@ class MATLABTest1(unittest.TestCase):
     def setUp(self):
         numpy.random.seed(1)
         self.env = environment.environment(10) #Create a 5 x 5 environment
-        self.env.create_agents(30,2)
+        self.env.create_agents(30,2,'separate')
 
     def testRabbit1(self):
         #Ensures that the first rabbit in the rabbits list has the same properties 
