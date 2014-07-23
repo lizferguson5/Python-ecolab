@@ -37,7 +37,7 @@ class fox:
         return(new)
 
     def move_pos(self, new_pos):
-        # Sets new position of rabbit.
+        # Sets new position of fox
         self.pos = new_pos
 
     def find_food(self, rabbits):
@@ -152,6 +152,7 @@ class rabbit:
     
     def move_pos(self, new_pos):
         # Sets new position of rabbit.
+        # Use to ensure that cpos and pos are always in sync
         self.pos = new_pos
         self.cpos = np.round(self.pos).astype(np.int) - 1
 
