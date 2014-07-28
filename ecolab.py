@@ -30,7 +30,19 @@ def agent_solve_matlab(env):
     env.agents.extend(new_agents)
             
     # Remove agents that are ready to die
-    env.agents = [a for a in env.agents if not a.dead and not a.has_been_eaten] 
+    # First, how many have been eaten? 
+    # We need to do it here since rabbits can be eaten twice
+    # This could be simplified if we stop using last_pos in the eat functions -- something we are doing to emulate the MATLAB results
+    num_rabbit_eaten = 0
+    for agent in env.agents:
+        if isinstance(agent,rabbit) and agent.has_been_eaten and not agent.dead:
+            num_rabbit_eaten = num_rabbit_eaten + 1
+    # Remove eaten and dead from the list of agents
+    env.agents = [a for a in env.agents if not a.dead and not a.has_been_eaten]
+
+    # The Dead are automatically accounted for in the .die() functions
+    # Only need to decrement total number of eaten 
+    rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_eaten
 
 def ecolab_matlab(size, nr, nf, steps):
     env = environment.environment(size)
@@ -39,11 +51,8 @@ def ecolab_matlab(size, nr, nf, steps):
     history = np.zeros((2,steps))
 
     for n_it in range(steps):
-        rabbits = [a for a in env.agents if isinstance(a,rabbit)]
-        foxes = [a for a in env.agents if isinstance(a,fox)]
-
-        history[0,n_it] = len(rabbits)
-        history[1,n_it] = len(foxes)
+        history[0,n_it] = rabbit.num_rabbits
+        history[1,n_it] = fox.num_foxes
 
         agent_solve_matlab(env)  
 

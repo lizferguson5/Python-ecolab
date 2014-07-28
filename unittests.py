@@ -44,6 +44,11 @@ class MATLABTest1(unittest.TestCase):
 class MATLABtest2(unittest.TestCase):
     #Compares results with a full MARTLAB run - ecolab(20,60,5,200) and rng(1)
 
+    def setUp(self):
+        #Reset counters
+        agents.rabbit.num_rabbits = 0
+        agents.fox.num_foxes = 0
+
     def testResults(self):
         numpy.random.seed(1)
         matlab_results = loadmat('fox_rabbit_20_60_5.mat')

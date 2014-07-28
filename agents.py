@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.random import rand
 
+
 class fox:
     # The following attributes will apply for all foxes
     speed = 5                # speed of movement - units per itn
@@ -9,28 +10,35 @@ class fox:
     foodbrd = 10               # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
     num_foxes = 0             # Number of alive foxes
+
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes vary on a per-fox basis
         self.age = age
         self.food = food
         self.pos = pos
-        self.old_pos = pos  # Temporary, to emulate behaviour of MATLAB original
+        # Temporary, to emulate behaviour of MATLAB original
+        self.old_pos = pos
         self.speed = speed
         self.last_breed = last_breed
         self.dead = False                # Is this agent dead or alive?
         self.has_been_eaten = False       # Has this agent been eaten?
 
-        # We've created a new instance so increment the counter
         self.__class__.num_foxes = self.__class__.num_foxes + 1
-        
+
     def __repr__(self):
-        out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.format(self.age, self.food, self.pos, self.speed, self.last_breed)
+        out = ('Age : {0}\nFood : {1}\nPos : {2}\n\
+               Speed: {3}\nlast_breed: {4}\n'.
+               format(self.age, self.food, self.pos, self.speed,
+                      self.last_breed))
         return(out)
+
     def breed(self):
-        # Only breed if agent has enough food and enough time has elapsed since last breeding
+        # Only breed if agent has enough food and enough time has elapsed
+        # since last breeding
         new = None
         if self.food >= self.foodbrd and self.last_breed >= self.brdfq:
-            new = fox(age=0, food=self.food / 2.0, pos=self.pos,  speed=self.speed, last_breed=0)
+            new = fox(age=0, food=self.food / 2.0,
+                      pos=self.pos,  speed=self.speed, last_breed=0)
             self.food = self.food / 2.0
             self.last_breed = 0
         else:
@@ -39,28 +47,25 @@ class fox:
         return(new)
 
     def move_pos(self, new_pos):
-        # Sets new position of rabbit.
+        # Sets new position of fox
         self.pos = new_pos
 
-    def find_food(self, rabbits):
-        # Find neearest food source
-        # I think the original has a bug. There is code that says what to do if there is more than one rabbit located at the same distance.
-        # This code is never executed since MATLAB's min function does not return multiple values
-        # To preserve the original results,  I always choose the first closest rabbit
-        min_distance = 1000000
-        min_index = -1
-        index = 0
+    def find_food(self, env):
+        # Get all old positions of agents as a numpy array.
+        # Foxes are given infinite distance so that they are never considered
+        old_pos = (np.array([agent.old_pos if isinstance(agent, rabbit)
+                   else [np.inf, np.inf] for agent in env.agents]))
+        # find squared distance between self and all positions in the araray
+        old_pos = ((self.pos[0]-old_pos[:, 0])**2 +
+                   (self.pos[1]-old_pos[:, 1])**2)
+        # Find minimum
+        index = np.argmin(old_pos)
 
-        for agent in rabbits:
-            # Don't bother taking the square root of distance. We are not interested in absolute distances
-            if isinstance(agent, rabbit):
-                distance_sq = (self.old_pos[0] - agent.old_pos[0])**2 + (self.old_pos[1] - agent.old_pos[1])**2
-
-                if distance_sq < min_distance:
-                    min_distance = distance_sq
-                    min_index = index
-            index = index + 1
-        return(np.sqrt(min_distance), min_index)
+        # If the minimum distance found points to a fox,
+        # i.e. is infiite distance away, return -1
+        if np.isinf(old_pos[index]):
+                    index = -1
+        return(np.sqrt(old_pos[index]), index)
 
     def eat(self, env):
         """
@@ -69,16 +74,17 @@ class fox:
         eaten is True if the fox eats. False otherwise
         """
         eaten = False
-        (distance, nearest_rabbit_ind) = self.find_food(env.agents)
+        (distance, nearest_rabbit_ind) = self.find_food(env)
         # probability that fox will kill rabbit is ratio of speed to distance
 
         if distance <= self.speed and nearest_rabbit_ind is not -1:
-             pk = 1 - (distance / self.speed)
+            pk = 1 - (distance / self.speed)
 
-             if pk > rand():
-
-                self.pos = env.agents[nearest_rabbit_ind].old_pos  # Move to same position as rabbit
-                env.agents[nearest_rabbit_ind].has_been_eaten = True  # kill rabbit
+            if pk > rand():
+                # Move to same position as rabbit
+                self.pos = env.agents[nearest_rabbit_ind].old_pos
+                # kill rabbit
+                env.agents[nearest_rabbit_ind].has_been_eaten = True
 
                 self.food = self.food + 2
                 eaten = True
@@ -95,8 +101,9 @@ class fox:
             npos[0] = self.pos[0] + self.speed * np.cos(direc)
             npos[1] = self.pos[1] + self.speed * np.sin(direc)
             # check that fox has not left edge of model - correct if so.
-            if npos[0] < env.bm_size and npos[1] < env.bm_size and npos[0] >= 1 and npos[1] >= 1:
-                    mig = True
+            if npos[0] < env.bm_size and npos[1] < env.bm_size and \
+               npos[0] >= 1 and npos[1] >= 1:
+                mig = True
             cnt = cnt+1
             direc = direc + (np.pi/4)
 
@@ -109,8 +116,7 @@ class fox:
         # they are older than max_age
         if self.food <= self.minfood or self.age > self.maxage:
             self.dead = True
-        self.__class__.num_foxes = self.__class__.num_foxes - 1 
-
+            self.__class__.num_foxes = self.__class__.num_foxes - 1
 
 
 class rabbit:
@@ -121,6 +127,7 @@ class rabbit:
     foodbrd = 10             # minimum food threshold for breeding
     maxage = 50               # maximum age allowed
     num_rabbits = 0         # Number of alive rabbits
+
     def __init__(self, age=[], food=[], pos=[], speed=[], last_breed=[]):
         # These attributes apply to individual rabbits
         self.age = age
@@ -137,7 +144,7 @@ class rabbit:
         self.has_been_eaten = False      # Has this agent been eaten?
 
         # We've created a new instance so increment the counter
-        self.__class__.num_rabbits = self.__class__.num_rabbits + 1 
+        self.__class__.num_rabbits = self.__class__.num_rabbits + 1
 
     def __repr__(self):
         out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.\
@@ -169,7 +176,7 @@ class rabbit:
         # are older than maxage
         if self.food <= self.minfood or self.age > self.maxage:
             self.dead = True
-        self.__class__.num_rabbits = self.__class__.num_rabbits - 1 
+            self.__class__.num_rabbits = self.__class__.num_rabbits - 1
 
     def eat(self, env):
         # obtain environment food level at current location
@@ -236,7 +243,7 @@ class rabbit:
             # rabbit has been unable to find food,
             # so chooses a random direction to move in
             cnt = 1
-            dir = rand()*2*np.pi
+            dir = rand() * 2*np.pi
             while not(mig) and cnt <= 8:
                 npos[0] = self.pos[0] + self.speed * np.cos(dir)
                 npos[1] = self.pos[1] + self.speed * np.sin(dir)
