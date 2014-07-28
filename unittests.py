@@ -61,6 +61,11 @@ class MATLABtest2(unittest.TestCase):
 
 class FoxTests(unittest.TestCase):
 
+    def setUp(self):
+        #Reset counters
+        agents.rabbit.num_rabbits = 0
+        agents.fox.num_foxes = 0
+
     def setUP(self):
         pass
 
@@ -78,7 +83,7 @@ class FoxTests(unittest.TestCase):
         fox.die()
         self.failUnless(fox.dead)
 
-    def testEat(self):
+    def testEat1(self):
         env = environment.environment(5)
         # Create a very fast fox
         fox = agents.fox(age=2,food=10,pos=[1.5,1.5],speed=10,last_breed=7)
@@ -91,6 +96,30 @@ class FoxTests(unittest.TestCase):
         # Doex rabbit know that its been eaten?
         self.failUnless(env.agents[0].has_been_eaten)
         #TODO - Make sure a slow fox doesn't eat a rabbit very far away
+
+    def testEat2(self):
+        # Ensure that the same rabbit doesn't get eaten multiple times in async mode
+        env = environment.environment(5,mode='async')
+        env.agents = []
+        # Surround a rabbit by 4 foxes in eating range
+        env.agents.append(agents.rabbit(20,30,[1.5,1.5],2,1))
+        env.agents.append(agents.fox(20,30,[1.5,1.25],10,10))
+        env.agents.append(agents.fox(20,30,[1.25,1.5],10,10))
+        env.agents.append(agents.fox(20,30,[1.25,1.25],10,10))
+        env.agents.append(agents.fox(20,30,[1.3,1.25],10,10))
+        
+        eaten1 = env.agents[1].eat(env)
+        eaten2 = env.agents[2].eat(env)
+        eaten3 = env.agents[3].eat(env)
+        eaten4 = env.agents[4].eat(env)
+
+        self.failUnless(eaten1,'Fox 1 should have eaten but didn''t')
+        self.failUnless(not eaten2,'Fox 2 should not have eaten but did')
+        self.failUnless(not eaten3,'Fox 3 should not have eaten but did')
+        self.failUnless(not eaten4,'Fox 4 should not have eaten but did')
+        self.failUnlessEqual(agents.rabbit.num_rabbits,0)
+
+
 
     def testBreed1(self):
         #Esnure that a fox that can breed, does breed
@@ -128,7 +157,9 @@ class FoxTests(unittest.TestCase):
 class RabbitTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        #Reset counters
+        agents.rabbit.num_rabbits = 0
+        agents.fox.num_foxes = 0
         
     def testDefault(self):
         self.rabbit = agents.rabbit()

@@ -11,28 +11,27 @@ def agent_solve(env):
         for agent in env.agents:
             agent.messages['old_pos'] = agent.pos
 
-    #Apply rules
-    for agent in env.agents:
-        eaten = agent.eat(env)
+        #Apply rules
+        for agent in env.agents:
+            eaten = agent.eat(env)
 
-        # If the agent hasn't eaten, migrate
-        if not eaten:
-            agent.migrate(env)
+            # If the agent hasn't eaten, migrate
+            if not eaten:
+                agent.migrate(env)
 
-        # Apply the death rule - from starvation or old age
-        agent.die()
-            
-        # If the agent did not die, apply the breed rule
-        if not agent.dead:
-            new = agent.breed()
-            if new is not None:
-                new_agents.append(new)
+            # Apply the death rule - from starvation or old age
+            agent.die()
                 
-    # Add new agents to list
-    env.agents.extend(new_agents)
+            # If the agent did not die, apply the breed rule
+            if not agent.dead:
+                new = agent.breed()
+                if new is not None:
+                    new_agents.append(new)
+                    
+        # Add new agents to list
+        env.agents.extend(new_agents)
                 
-    # Clean up the dead
-    if env.mode == 'sync':
+        # Clean up the dead
         # First, how many have been eaten? 
         # We need to do it here since rabbits can be eaten twice
         # This could be simplified if we stop using last_pos in the eat functions -- something we are doing to emulate the MATLAB results
@@ -48,9 +47,34 @@ def agent_solve(env):
         # Only need to decrement total number of eaten rabbits
         rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_eaten
 
+    if env.mode == 'async':
+        # Apply rules
+        for agent in env.agents:
+            eaten = agent.eat(env)
 
-def ecolab(size, nr, nf, steps):
-    env = environment.environment(size, mode='sync')
+            # If the agent hasn't eaten, migrate
+            if not eaten:
+                agent.migrate(env)
+
+            # Apply the death rule - from starvation or old age
+            agent.die()
+                
+            # If the agent did not die, apply the breed rule
+            if not agent.dead:
+                new = agent.breed()
+                if new is not None:
+                    new_agents.append(new)
+                    
+        # Add new agents to list
+        env.agents.extend(new_agents)
+        
+        # Clean up the dead
+        env.agents = ([a for a in env.agents if not a.dead and
+                      not a.has_been_eaten])
+
+
+def ecolab(size, nr, nf, steps,mode='sync'):
+    env = environment.environment(size, mode)
     env.create_agents(nr, nf, 'joined')
 
     history = np.zeros((2, steps))

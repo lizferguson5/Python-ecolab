@@ -60,7 +60,7 @@ class fox:
             pos_array = (np.array([agent.messages['old_pos'] if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
         elif env.mode == 'async':
-            pos_array = (np.array([agent.pos if isinstance(agent, rabbit)
+            pos_array = (np.array([agent.pos if isinstance(agent, rabbit) and not agent.dead and not agent.has_been_eaten
                        else [np.inf, np.inf] for agent in env.agents]))
         # find squared distance between self and all positions in the araray
         pos_array = ((self.pos[0] - pos_array[:, 0])**2 +
@@ -88,10 +88,18 @@ class fox:
             pk = 1 - (distance / self.speed)
 
             if pk > rand():
-                # Move to same position as rabbit
-                self.pos = env.agents[nearest_rabbit_ind].messages['old_pos']
-                # kill rabbit
-                env.agents[nearest_rabbit_ind].has_been_eaten = True
+                if env.mode =='sync':
+                    # Move to position of rabbit in previous iteration
+                    self.pos = env.agents[nearest_rabbit_ind].messages['old_pos']
+                    # kill rabbit. Do not decrement the number of rabbits because, in this mode
+                    # It is possible for the same rabbit to be eaten twice as per the MATLAB original
+                    env.agents[nearest_rabbit_ind].has_been_eaten = True
+                elif env.mode == 'async':
+                    # Move to current position of rabbit
+                    self.pos = env.agents[nearest_rabbit_ind].pos
+                    # Kill rabbit
+                    env.agents[nearest_rabbit_ind].has_been_eaten = True
+                    rabbit.num_rabbits = rabbit.num_rabbits - 1
 
                 self.food = self.food + 2
                 eaten = True
