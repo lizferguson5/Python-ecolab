@@ -16,13 +16,15 @@ class fox:
         self.age = age
         self.food = food
         self.pos = pos
-        # Temporary, to emulate behaviour of MATLAB original
-        self.old_pos = pos
         self.speed = speed
         self.last_breed = last_breed
-        self.dead = False                # Is this agent dead or alive?
+        self.dead = False                 # Is this agent dead or alive?
         self.has_been_eaten = False       # Has this agent been eaten?
 
+        # Messages passed to this agent
+        self.messages = {}
+
+        # Incremenent number of alive foxes by one 
         self.__class__.num_foxes = self.__class__.num_foxes + 1
 
     def __repr__(self):
@@ -51,25 +53,30 @@ class fox:
         self.pos = new_pos
 
     def find_food(self, env):
-        # Get all old positions of agents as a numpy array.
+        # Get all positions of agents as a numpy array.
         # Foxes are given infinite distance so that they are never considered
-        old_pos = (np.array([agent.old_pos if isinstance(agent, rabbit)
-                   else [np.inf, np.inf] for agent in env.agents]))
+        if env.mode =='sync':
+        # syncronous mode - use position of rabbit from previous iteration
+            pos_array = (np.array([agent.messages['old_pos'] if isinstance(agent, rabbit)
+                       else [np.inf, np.inf] for agent in env.agents]))
+        elif menv.ode == 'async':
+            pos_array = (np.array([agent.pos if isinstance(agent, rabbit)
+                       else [np.inf, np.inf] for agent in env.agents]))
         # find squared distance between self and all positions in the araray
-        old_pos = ((self.pos[0]-old_pos[:, 0])**2 +
-                   (self.pos[1]-old_pos[:, 1])**2)
+        pos_array = ((self.pos[0] - pos_array[:, 0])**2 +
+                   (self.pos[1] - pos_array[:, 1])**2)
         # Find minimum
-        index = np.argmin(old_pos)
+        index = np.argmin(pos_array)
 
         # If the minimum distance found points to a fox,
         # i.e. is infiite distance away, return -1
-        if np.isinf(old_pos[index]):
+        if np.isinf(pos_array[index]):
                     index = -1
-        return(np.sqrt(old_pos[index]), index)
+        return(np.sqrt(pos_array[index]), index)
 
     def eat(self, env):
         """
-        eaten = eat(self,env)
+        eaten = eat(self, env)
 
         eaten is True if the fox eats. False otherwise
         """
@@ -82,7 +89,7 @@ class fox:
 
             if pk > rand():
                 # Move to same position as rabbit
-                self.pos = env.agents[nearest_rabbit_ind].old_pos
+                self.pos = env.agents[nearest_rabbit_ind].messages['old_pos']
                 # kill rabbit
                 env.agents[nearest_rabbit_ind].has_been_eaten = True
 
@@ -133,8 +140,7 @@ class rabbit:
         self.age = age
         self.food = food
         self.pos = pos
-        # old_pos Temporary, to emulate behaviour of MATLAB original
-        self.old_pos = pos
+
         # cpos: round up position to nearest grid point
         self.cpos = np.round(pos).astype(np.int) - 1
         self.speed = speed
@@ -142,6 +148,9 @@ class rabbit:
 
         self.dead = False                # Is this agent dead or alive?
         self.has_been_eaten = False      # Has this agent been eaten?
+
+        # Messages passed to this agent
+        self.messages = {}
 
         # We've created a new instance so increment the counter
         self.__class__.num_rabbits = self.__class__.num_rabbits + 1

@@ -54,7 +54,7 @@ class MATLABtest2(unittest.TestCase):
         matlab_results = loadmat('fox_rabbit_20_60_5.mat')
         matlab_data = matlab_results['the_data']
 
-        (agents,env,history) = ecolab.ecolab_matlab(size=20,nr=60,nf=5,steps=201)
+        (agents,env,history) = ecolab.ecolab(size=20,nr=60,nf=5,steps=201)
 
         self.failUnless(all(history[0]==matlab_data[0]) and all(history[1]==matlab_data[1]),'Does not agree with MATLAB test data')
         
@@ -80,13 +80,15 @@ class FoxTests(unittest.TestCase):
 
     def testEat(self):
         env = environment.environment(5)
-        #Create a very fast fox
+        # Create a very fast fox
         fox = agents.fox(age=2,food=10,pos=[1.5,1.5],speed=10,last_breed=7)
-        #create a rabbit very close to it
+        # create a rabbit very close to it
         env.agents = [agents.rabbit(age=2,food=10,pos=[1.52,1.52],speed=10,last_breed=7)]
-        #Its almost certain that this fox ate this rabbit
+        #Set the previous position of rabbit to be [1.52,1.52]
+        env.agents[0].messages['old_pos'] = [1.52,1.52]
+        # Its almost certain that this fox ate this rabbit
         fox.eat(env)
-        #Doex rabbit know that its been eaten?
+        # Doex rabbit know that its been eaten?
         self.failUnless(env.agents[0].has_been_eaten)
         #TODO - Make sure a slow fox doesn't eat a rabbit very far away
 
