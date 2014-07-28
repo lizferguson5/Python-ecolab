@@ -56,7 +56,7 @@ class fox:
         # Get all positions of agents as a numpy array.
         # Foxes are given infinite distance so that they are never considered
         if env.mode =='sync':
-        # syncronous mode - use position of rabbit from previous iteration
+        # syncronous mode - use state of rabbit from previous iteration by using the messages dictionary
             pos_array = (np.array([agent.messages['old_pos'] if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
         elif env.mode == 'async':
