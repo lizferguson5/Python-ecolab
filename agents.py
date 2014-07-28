@@ -59,7 +59,7 @@ class fox:
         # syncronous mode - use position of rabbit from previous iteration
             pos_array = (np.array([agent.messages['old_pos'] if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
-        elif menv.ode == 'async':
+        elif env.mode == 'async':
             pos_array = (np.array([agent.pos if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
         # find squared distance between self and all positions in the araray

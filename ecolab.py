@@ -1,39 +1,38 @@
 from agents import rabbit, fox
 import environment
 import numpy as np
-from numpy.random import rand
-import copy
-
 
 def agent_solve(env):
     new_agents = []  # List of new agents created for this iteration
 
     if env.mode == 'sync':
-        # Update old_pos in each agent's message dictionaory 
+        # Update old_pos in each agent's message dictionary 
         # so that it contains position from previous iteration
         for agent in env.agents:
             agent.messages['old_pos'] = agent.pos
 
-        for agent in env.agents:
-                eaten = agent.eat(env)
+    #Apply rules
+    for agent in env.agents:
+        eaten = agent.eat(env)
 
-                # If the agent hasn't eaten, migrate
-                if not eaten:
-                    agent.migrate(env)
+        # If the agent hasn't eaten, migrate
+        if not eaten:
+            agent.migrate(env)
 
-                # Apply the death rule - from starvation or old age
-                agent.die()
+        # Apply the death rule - from starvation or old age
+        agent.die()
+            
+        # If the agent did not die, apply the breed rule
+        if not agent.dead:
+            new = agent.breed()
+            if new is not None:
+                new_agents.append(new)
                 
-                # If the agent did not die, apply the breed rule
-                if not agent.dead:
-                    new = agent.breed()
-                    if new is not None:
-                        new_agents.append(new)
+    # Add new agents to list
+    env.agents.extend(new_agents)
                 
-        # Add new agents to list
-        env.agents.extend(new_agents)
-                
-        # Remove agents that are ready to die
+    # Clean up the dead
+    if env.mode == 'sync':
         # First, how many have been eaten? 
         # We need to do it here since rabbits can be eaten twice
         # This could be simplified if we stop using last_pos in the eat functions -- something we are doing to emulate the MATLAB results
