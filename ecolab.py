@@ -24,7 +24,7 @@ def agent_solve(env):
                 
             # If the agent did not die, apply the breed rule
             if not agent.dead:
-                new = agent.breed()
+                new = agent.breed(env)
                 if new is not None:
                     new_agents.append(new)
                     
@@ -61,7 +61,7 @@ def agent_solve(env):
                 
             # If the agent did not die, apply the breed rule
             if not agent.dead:
-                new = agent.breed()
+                new = agent.breed(env)
                 if new is not None:
                     new_agents.append(new)
                     

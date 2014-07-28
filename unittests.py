@@ -119,38 +119,36 @@ class FoxTests(unittest.TestCase):
         self.failUnless(not eaten4,'Fox 4 should not have eaten but did')
         self.failUnlessEqual(agents.rabbit.num_rabbits,0)
 
-
-
     def testBreed1(self):
         #Esnure that a fox that can breed, does breed
-
+        env = environment.environment(5)
         #Create a fox that's ready to breed
         fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
-        new_fox = fox.breed()
+        new_fox = fox.breed(env)
         self.failUnless(isinstance(new_fox,agents.fox))
 
     def testBreed2(self):
         #Esnure that a breeding fox correctly distributes food
-
+        env = environment.environment(5)
         #Create a fox that's ready to breed
         fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
-        new_fox = fox.breed()
+        new_fox = fox.breed(env)
         self.failUnless(fox.food == 50 and new_fox.food == 50)
 
     def testBreed3(self):
         #Esnure that a breeding fox correctly zeros last_breed
-
+        env = environment.environment(5)
         #Create a fox that's ready to breed
         fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
-        new_fox = fox.breed()
+        new_fox = fox.breed(env)
         self.failUnless(new_fox.last_breed == 0 and new_fox.last_breed == 0)
 
     def testBreed4(self):
         #Esnure that a fox that is not ready to breed, doesn't
-
+        env = environment.environment(5)
         #Create a fox that's not ready to breed doesn't
         fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=10)
-        new_fox = fox.breed()
+        new_fox = fox.breed(env)
         self.failUnless(new_fox is None)
 
 
@@ -271,12 +269,26 @@ class RabbitTests(unittest.TestCase):
 
     def testBreed1(self):
         #Esnure that a rabbit that can breed, does breed
-
+        env = environment.environment(5)
         #Create a rabbit that's ready to breed
         rabbit = agents.rabbit(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
-        new_rabbit = rabbit.breed()
+        new_rabbit = rabbit.breed(env)
         self.failUnless(isinstance(new_rabbit,agents.rabbit))
 
+    def testBreed2(self):
+        #Ensure that an eaten rabbit doesn't breed in async mode
+        env = environment.environment(5,mode='async')
+        env.agents = []
+
+        # Put a hungry fox next to a rabbit
+        env.agents.append(agents.fox(20,30,[1.5,1.5],5,10))
+        env.agents.append(agents.rabbit(20,30,[1.5,1.25],2,10))
+
+        eaten = env.agents[0].eat(env)
+        self.failUnless(eaten,'Fox should have eaten rabbit')
+
+        new = env.agents[1].breed(env)
+        self.failUnless(new is None,'Dead rabbit bred')
 
 def main():
     unittest.main()

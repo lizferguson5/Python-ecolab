@@ -34,7 +34,7 @@ class fox:
                       self.last_breed))
         return(out)
 
-    def breed(self):
+    def breed(self,env):
         # Only breed if agent has enough food and enough time has elapsed
         # since last breeding
         new = None
@@ -168,17 +168,26 @@ class rabbit:
             format(self.age, self.food, self.pos, self.speed, self.last_breed)
         return(out)
 
-    def breed(self):
+    def breed(self,env):
         # Only breed if agent has enough food and enough time
         # has elapsed since last breeding
-
         new = None
-        if self.food >= self.foodbrd and self.last_breed >= self.brdfq:
-            new = rabbit(0, self.food/2.0, self.pos,  self.speed, 0)
-            self.food = self.food/2.0
-            self.last_breed = 0
-        else:
-            self.last_breed = self.last_breed + 1
+        # In 'sync' mode, we replicate the original MATLAB code bugs
+        if env.mode =='sync':
+            if self.food >= self.foodbrd and self.last_breed >= self.brdfq:
+                new = rabbit(0, self.food/2.0, self.pos,  self.speed, 0)
+                self.food = self.food/2.0
+                self.last_breed = 0
+            else:
+                self.last_breed = self.last_breed + 1
+        if env.mode == 'async':
+            if not self.has_been_eaten and self.food >= self.foodbrd and self.last_breed >= self.brdfq:
+                new = rabbit(0, self.food/2.0, self.pos,  self.speed, 0)
+                self.food = self.food/2.0
+                self.last_breed = 0
+            else:
+                self.last_breed = self.last_breed + 1
+
         self.age = self.age + 1
         return(new)
 
