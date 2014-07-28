@@ -1,14 +1,16 @@
-from agents import rabbit,fox
+from agents import rabbit, fox
 import environment
 import numpy as np
 from numpy.random import rand
 import copy
 
+
 def agent_solve(env):
     new_agents = []  # List of new agents created for this iteration
 
-    if env.mode == 'sync': 
-        # Update old_pos in each agent's message dictionaory so that it contains position from previous iteration
+    if env.mode == 'sync':
+        # Update old_pos in each agent's message dictionaory 
+        # so that it contains position from previous iteration
         for agent in env.agents:
             agent.messages['old_pos'] = agent.pos
 
@@ -40,22 +42,24 @@ def agent_solve(env):
             if isinstance(agent,rabbit) and agent.has_been_eaten and not agent.dead:
                 num_rabbit_eaten = num_rabbit_eaten + 1
         # Remove eaten and dead from the list of agents
-        env.agents = [a for a in env.agents if not a.dead and not a.has_been_eaten]
+        env.agents = ([a for a in env.agents if not a.dead and
+                      not a.has_been_eaten])
 
         # The Dead are automatically accounted for in the .die() functions
-        # Only need to decrement total number of eaten rabbits 
+        # Only need to decrement total number of eaten rabbits
         rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_eaten
 
-def ecolab(size, nr, nf, steps):
-    env = environment.environment(size)
-    env.create_agents(nr,nf,'joined')
 
-    history = np.zeros((2,steps))
+def ecolab(size, nr, nf, steps):
+    env = environment.environment(size, mode='sync')
+    env.create_agents(nr, nf, 'joined')
+
+    history = np.zeros((2, steps))
 
     for n_it in range(steps):
-        history[0,n_it] = rabbit.num_rabbits
-        history[1,n_it] = fox.num_foxes
+        history[0, n_it] = rabbit.num_rabbits
+        history[1, n_it] = fox.num_foxes
 
-        agent_solve(env)  
+        agent_solve(env)
 
     return(env.agents,env,history)

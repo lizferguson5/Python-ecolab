@@ -3,7 +3,7 @@ from agents import rabbit,fox
 from numpy.random import rand
 
 class environment:
-    def __init__(self, size):
+    def __init__(self, size, mode='sync'):
         self.bm_size= size
         
         # distribute food - 50 per square
@@ -13,7 +13,7 @@ class environment:
         self.food[np.round(0.6 * size)-1:np.round(0.8*size),np.round(0.6*size)-1:np.round(0.8*size)] = 0
 
         # Is this model syncronous or asyncronous?
-        self.mode = 'sync'
+        self.mode = mode
 
     def create_agents(self,nr, nf, list_type='joined'):
         """
