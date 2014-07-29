@@ -34,3 +34,24 @@ For example
 
 Run the file **run\_simulation.py**. This runs the same simulation twice, once in async mode and once in sync mode.  The results are saved as .csv files and plotting as .png files
 
+### Timings
+To compare timings, I modified the original MATLAB ecolab to remove the plotting routines and to switch the RNG to Mersenne Twister.  This ensures that Python and MATLAB give identical results in sync mode.
+
+I haven't implemented the fast convergence mode in Python ecolab yet (i.e. where the simulation stops if one agent goes to 0) so we switch this off in MATLAB.  
+
+On my late 2013 Macbook Air, I get:
+
+MATLAB: 
+`tic;ecolab(20,200,30,100,'false');toc
+Elapsed time is 1.295951 seconds.`
+
+Python:
+
+    import ecolab
+
+    (agents,env,history)=ecolab.ecolab(size=20, nr=200, nf=30, steps=100, mode='sync')
+
+This took 0.399 seconds
+
+In general, the Python version is faster but the amount by which its faster appears to vary
+
