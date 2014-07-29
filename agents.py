@@ -125,7 +125,7 @@ class fox:
         if mig:
             self.move_pos(npos)
 
-    def die(self):
+    def die(self,env):
         # fox.die(self)
         # foxes die if their food level reaches zero or
         # they are older than max_age
@@ -196,13 +196,20 @@ class rabbit:
         self.pos = new_pos
         self.cpos = np.round(self.pos).astype(np.int) - 1
 
-    def die(self):
+    def die(self,env):
         # rabbit.die(self)
         # rabbits die if their food level reaches zero or they
         # are older than maxage
+        # If they've been eaten, they are dead 
         if self.food <= self.minfood or self.age > self.maxage:
             self.dead = True
-            self.__class__.num_rabbits = self.__class__.num_rabbits - 1
+            # async mode only:
+            # Only decrement counter if rabbit hasn't also been eaten
+            if env.mode == 'async':
+                if not self.has_been_eaten:
+                    self.__class__.num_rabbits = self.__class__.num_rabbits - 1
+            elif env.mode == 'sync':
+                self.__class__.num_rabbits = self.__class__.num_rabbits - 1
 
     def eat(self, env):
         # obtain environment food level at current location

@@ -66,21 +66,20 @@ class FoxTests(unittest.TestCase):
         agents.rabbit.num_rabbits = 0
         agents.fox.num_foxes = 0
 
-    def setUP(self):
-        pass
-
     def testDieOld(self):
+        env = environment.environment(5)
         #Create an old fox
         fox= agents.fox(age=1000,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
         
-        fox.die()
+        fox.die(env)
         self.failUnless(fox.dead)
         
     def testDieStarve(self):
+        env = environment.environment(5)
         #Create a starving fox
         fox= agents.fox(age=2,food=-1,pos=[5.5,5.5],speed=2,last_breed=7)
         #Ensure that it knows that its time to die
-        fox.die()
+        fox.die(env)
         self.failUnless(fox.dead)
 
     def testEat1(self):
@@ -168,18 +167,35 @@ class RabbitTests(unittest.TestCase):
         self.assertEqual(self.rabbit.last_breed,[])
 
     def testDieOld(self):
+        env = environment.environment(10)
         # Create an old rabbit
         rabbit= agents.rabbit(age=1000,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
         # Ensure that it knows that its time to die
-        rabbit.die()
+        rabbit.die(env)
         self.failUnless(rabbit.dead,'Ancient rabbit did not die')
 
     def testDieStarve(self):
+        env = environment.environment(10)
         # Create a starving fox
         rabbit= agents.rabbit(age=2,food=-1,pos=[5.5,5.5],speed=2,last_breed=7)
         # Ensure that it knows that its time to die
-        rabbit.die()
+        rabbit.die(env)
         self.failUnless(rabbit.dead,'Starved rabbit did not die')
+
+    def testDieDoubleCount(self):
+        # Ensure that we don't decrement rabbit counter twice
+        # If an eaten rabbit was also ready to die
+        env = environment.environment(10,'async')
+        env.agents = []
+        # Put an old rabbit next to a hungry fox
+        env.agents.append(agents.rabbit(1000,30,[1.5,1.5],2,1))
+        env.agents.append(agents.fox(20,30,[1.5,1.25],10,10))
+        # Fox eats rabbit
+        eaten = env.agents[1].eat(env)
+        self.failUnless(eaten,'Fox didn''t eat rabbit')
+        # Apply die rule to the dead rabbit
+        env.agents[0].die(env)
+        self.failUnlessEqual(agents.rabbit.num_rabbits,0,'Should be 0 rabbits')
 
     def testCpos(self):
         # Ensures cpos is calculated correctly

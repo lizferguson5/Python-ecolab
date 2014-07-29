@@ -20,7 +20,7 @@ def agent_solve(env):
                 agent.migrate(env)
 
             # Apply the death rule - from starvation or old age
-            agent.die()
+            agent.die(env)
                 
             # If the agent did not die, apply the breed rule
             if not agent.dead:
@@ -57,7 +57,7 @@ def agent_solve(env):
                 agent.migrate(env)
 
             # Apply the death rule - from starvation or old age
-            agent.die()
+            agent.die(env)
                 
             # If the agent did not die, apply the breed rule
             if not agent.dead:
@@ -74,6 +74,35 @@ def agent_solve(env):
 
 
 def ecolab(size, nr, nf, steps,mode='sync'):
+    """ecolab - Python version of the original MATLAB code by Dawn Walker.
+    Python version by Mike Croucher.
+
+    Parameters
+    ----------
+
+    size : integer
+        The length of one side of the square of the environment in which the
+        agents live.
+
+    nr: integer
+        Initial Number of rabbits
+
+    nf: integer
+        Initial number of foxes
+
+    steps: integer
+        Number of simulation steps
+
+    mode: string (default='sync')
+        Simulation mode, either 'sync' or 'async'
+        'sync' - Agents use information on previous iteration on which to 
+        base their decisions. This gives the same results as MATLAB. 
+        Some unphysical events can occur such as a dead rabbit giving birth
+
+        'async' - Agents always use the most up to date information on which
+        to base their decsisons. 
+
+    """
     env = environment.environment(size, mode)
     env.create_agents(nr, nf, 'joined')
 
