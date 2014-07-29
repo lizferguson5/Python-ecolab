@@ -27,19 +27,19 @@ class MATLABTest1(unittest.TestCase):
     def testRabbit1(self):
         #Ensures that the first rabbit in the rabbits list has the same properties 
         #as the MATLAB model
-        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[0] ,4.7532, places=4)
-        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[1] ,1.8851, places=4)
-        self.failUnlessEqual(self.env.rabbits[0].age,1)  
-        self.failUnlessEqual(self.env.rabbits[0].food,31)
-        self.failUnlessEqual(self.env.rabbits[0].speed,2)
-        self.failUnlessEqual(self.env.rabbits[0].last_breed,7)
+        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[0], 4.7532, places=4)
+        self.failUnlessAlmostEqual(self.env.rabbits[0].pos[1], 1.8851, places=4)
+        self.failUnlessEqual(self.env.rabbits[0].age, 1)  
+        self.failUnlessEqual(self.env.rabbits[0].food, 31)
+        self.failUnlessEqual(self.env.rabbits[0].speed, 2)
+        self.failUnlessEqual(self.env.rabbits[0].last_breed, 7)
 
     def testFoxMigrate(self):
         numpy.random.seed(1)
-        fox= agents.fox(age=2,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
+        fox= agents.fox(age=2, food=10, pos=[5.5,5.5], speed=2, last_breed=7)
         fox.migrate(self.env)
-        self.failUnlessAlmostEqual(fox.pos[0],3.765721,places=4,msg='Migrating fox has given different results from MATLAB')
-        self.failUnlessAlmostEqual(fox.pos[1],6.496130,places=4,msg='Migrating fox has given different results from MATLAB')
+        self.failUnlessAlmostEqual(fox.pos[0], 3.765721, places=4, msg='Migrating fox has given different results from MATLAB')
+        self.failUnlessAlmostEqual(fox.pos[1], 6.496130, places=4, msg='Migrating fox has given different results from MATLAB')
 
 class MATLABtest2(unittest.TestCase):
     #Compares results with a full MARTLAB run - ecolab(20,60,5,200) and rng(1)
@@ -54,7 +54,7 @@ class MATLABtest2(unittest.TestCase):
         matlab_results = loadmat('fox_rabbit_20_60_5.mat')
         matlab_data = matlab_results['the_data']
 
-        (agents,env,history) = ecolab.ecolab(size=20,nr=60,nf=5,steps=201)
+        (agents,env,history) = ecolab.ecolab(size=20, nr=60, nf=5, steps=201)
 
         self.failUnless(all(history[0]==matlab_data[0]) and all(history[1]==matlab_data[1]),'Does not agree with MATLAB test data')
         
@@ -70,7 +70,7 @@ class FoxTests(unittest.TestCase):
     def testDieOld(self):
         env = environment.environment(5)
         #Create an old fox
-        fox= agents.fox(age=1000,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
+        fox= agents.fox(age=1000, food=10, pos=[5.5,5.5], speed=2, last_breed=7)
         
         fox.die(env)
         self.failUnless(fox.dead)
@@ -78,7 +78,7 @@ class FoxTests(unittest.TestCase):
     def testDieStarve(self):
         env = environment.environment(5)
         #Create a starving fox
-        fox= agents.fox(age=2,food=-1,pos=[5.5,5.5],speed=2,last_breed=7)
+        fox= agents.fox(age=2, food=-1, pos=[5.5,5.5], speed=2, last_breed=7)
         #Ensure that it knows that its time to die
         fox.die(env)
         self.failUnless(fox.dead)
@@ -86,11 +86,11 @@ class FoxTests(unittest.TestCase):
     def testEat1(self):
         env = environment.environment(5)
         # Create a very fast fox
-        fox = agents.fox(age=2,food=10,pos=[1.5,1.5],speed=10,last_breed=7)
+        fox = agents.fox(age=2, food=10, pos=[1.5,1.5], speed=10, last_breed=7)
         # create a rabbit very close to it
-        env.agents = [agents.rabbit(age=2,food=10,pos=[1.52,1.52],speed=10,last_breed=7)]
+        env.agents = [agents.rabbit(age=2, food=10, pos=[1.52,1.52], speed=10, last_breed=7)]
         #Set the previous position of rabbit to be [1.52,1.52]
-        env.agents[0].messages['old_pos'] = [1.52,1.52]
+        env.agents[0].messages['old_pos'] = [1.52, 1.52]
         # Its almost certain that this fox ate this rabbit
         fox.eat(env)
         # Doex rabbit know that its been eaten?
@@ -103,28 +103,28 @@ class FoxTests(unittest.TestCase):
         env = environment.environment(5,mode='async')
         env.agents = []
         # Surround a rabbit by 4 foxes in eating range
-        env.agents.append(agents.rabbit(20,30,[1.5,1.5],2,1))
-        env.agents.append(agents.fox(20,30,[1.5,1.25],10,10))
-        env.agents.append(agents.fox(20,30,[1.25,1.5],10,10))
-        env.agents.append(agents.fox(20,30,[1.25,1.25],10,10))
-        env.agents.append(agents.fox(20,30,[1.3,1.25],10,10))
+        env.agents.append(agents.rabbit(20 ,30, [1.5, 1.5], 2, 1))
+        env.agents.append(agents.fox(20 ,30, [1.5, 1.25], 10, 10))
+        env.agents.append(agents.fox(20 ,30, [1.25, 1.5], 10, 10))
+        env.agents.append(agents.fox(20 ,30, [1.25, 1.25], 10, 10))
+        env.agents.append(agents.fox(20 ,30, [1.3, 1.25], 10, 10))
         
         eaten1 = env.agents[1].eat(env)
         eaten2 = env.agents[2].eat(env)
         eaten3 = env.agents[3].eat(env)
         eaten4 = env.agents[4].eat(env)
 
-        self.failUnless(eaten1,'Fox 1 should have eaten but didn''t')
-        self.failUnless(not eaten2,'Fox 2 should not have eaten but did')
-        self.failUnless(not eaten3,'Fox 3 should not have eaten but did')
-        self.failUnless(not eaten4,'Fox 4 should not have eaten but did')
+        self.failUnless(eaten1, 'Fox 1 should have eaten but didn''t')
+        self.failUnless(not eaten2, 'Fox 2 should not have eaten but did')
+        self.failUnless(not eaten3, 'Fox 3 should not have eaten but did')
+        self.failUnless(not eaten4, 'Fox 4 should not have eaten but did')
         self.failUnlessEqual(agents.rabbit.num_rabbits,0)
 
     def testBreed1(self):
         #Esnure that a fox that can breed, does breed
         env = environment.environment(5)
         #Create a fox that's ready to breed
-        fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
+        fox= agents.fox(age=30, food=100, pos=[5.5,5.5], speed=2, last_breed=21)
         new_fox = fox.breed(env)
         self.failUnless(isinstance(new_fox,agents.fox))
 
@@ -132,7 +132,7 @@ class FoxTests(unittest.TestCase):
         #Esnure that a breeding fox correctly distributes food
         env = environment.environment(5)
         #Create a fox that's ready to breed
-        fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
+        fox= agents.fox(age=30, food=100, pos=[5.5,5.5], speed=2, last_breed=21)
         new_fox = fox.breed(env)
         self.failUnless(fox.food == 50 and new_fox.food == 50)
 
@@ -140,7 +140,7 @@ class FoxTests(unittest.TestCase):
         #Esnure that a breeding fox correctly zeros last_breed
         env = environment.environment(5)
         #Create a fox that's ready to breed
-        fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=21)
+        fox= agents.fox(age=30, food=100, pos=[5.5,5.5], speed=2, last_breed=21)
         new_fox = fox.breed(env)
         self.failUnless(new_fox.last_breed == 0 and new_fox.last_breed == 0)
 
@@ -148,7 +148,7 @@ class FoxTests(unittest.TestCase):
         #Esnure that a fox that is not ready to breed, doesn't
         env = environment.environment(5)
         #Create a fox that's not ready to breed doesn't
-        fox= agents.fox(age=30,food=100,pos=[5.5,5.5],speed=2,last_breed=10)
+        fox= agents.fox(age=30, food=100, pos=[5.5,5.5], speed=2, last_breed=10)
         new_fox = fox.breed(env)
         self.failUnless(new_fox is None)
 
