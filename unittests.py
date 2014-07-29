@@ -63,6 +63,7 @@ class FoxTests(unittest.TestCase):
 
     def setUp(self):
         #Reset counters
+        numpy.random.seed(1)
         agents.rabbit.num_rabbits = 0
         agents.fox.num_foxes = 0
 
@@ -97,6 +98,7 @@ class FoxTests(unittest.TestCase):
         #TODO - Make sure a slow fox doesn't eat a rabbit very far away
 
     def testEat2(self):
+        
         # Ensure that the same rabbit doesn't get eaten multiple times in async mode
         env = environment.environment(5,mode='async')
         env.agents = []
@@ -157,6 +159,7 @@ class RabbitTests(unittest.TestCase):
         #Reset counters
         agents.rabbit.num_rabbits = 0
         agents.fox.num_foxes = 0
+        numpy.random.seed(1)
         
     def testDefault(self):
         self.rabbit = agents.rabbit()
