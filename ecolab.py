@@ -2,16 +2,19 @@ from agents import rabbit, fox
 import environment
 import numpy as np
 
+
 def agent_solve(env):
+    """Runs one iteration of the simulation.
+    """
     new_agents = []  # List of new agents created for this iteration
 
     if env.mode == 'sync':
-        # Update old_pos in each agent's message dictionary 
+        # Update old_pos in each agent's message dictionary
         # so that it contains position from previous iteration
         for agent in env.agents:
             agent.messages['old_pos'] = agent.pos
 
-        #Apply rules
+        # Apply rules
         for agent in env.agents:
             eaten = agent.eat(env)
 
@@ -21,29 +24,30 @@ def agent_solve(env):
 
             # Apply the death rule - from starvation or old age
             agent.die(env)
-                
+
             # If the agent did not die, apply the breed rule
             if not agent.dead:
                 new = agent.breed(env)
                 if new is not None:
                     new_agents.append(new)
-                    
+
         # Add new agents to list
         env.agents.extend(new_agents)
-                
+
         # Clean up the dead
-        # First, how many have been eaten? 
-        # We need to do it here since rabbits can be eaten twice
-        # This could be simplified if we stop using last_pos in the eat functions -- something we are doing to emulate the MATLAB results
+        # First, how many have been eaten?
+        # Done here in order to emulate MATLAB results
         num_rabbit_eaten = 0
         for agent in env.agents:
-            if isinstance(agent,rabbit) and agent.has_been_eaten and not agent.dead:
+            if isinstance(agent, rabbit) and (agent.has_been_eaten and not
+                                              agent.dead):
                 num_rabbit_eaten = num_rabbit_eaten + 1
         # Remove eaten and dead from the list of agents
         env.agents = ([a for a in env.agents if not a.dead and
                       not a.has_been_eaten])
 
-        # The Dead are automatically accounted for in the .die() functions
+        # The starving and old are automatically accounted for in the
+        # .die() functions
         # Only need to decrement total number of eaten rabbits
         rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_eaten
 
@@ -58,22 +62,22 @@ def agent_solve(env):
 
             # Apply the death rule - from starvation or old age
             agent.die(env)
-                
+
             # If the agent did not die, apply the breed rule
             if not agent.dead:
                 new = agent.breed(env)
                 if new is not None:
                     new_agents.append(new)
-                    
+
         # Add new agents to list
         env.agents.extend(new_agents)
-        
+
         # Clean up the dead
         env.agents = ([a for a in env.agents if not a.dead and
                       not a.has_been_eaten])
 
 
-def ecolab(size, nr, nf, steps,mode='sync'):
+def ecolab(size, nr, nf, steps, mode='sync'):
     """ecolab - Python version of the original MATLAB code by Dawn Walker.
     Python version by Mike Croucher.
 
@@ -95,12 +99,12 @@ def ecolab(size, nr, nf, steps,mode='sync'):
 
     mode: string (default='sync')
         Simulation mode, either 'sync' or 'async'
-        'sync' - Agents use information on previous iteration on which to 
-        base their decisions. This gives the same results as MATLAB. 
+        'sync' - Agents use information on previous iteration on which to
+        base their decisions. This gives the same results as MATLAB.
         Some unphysical events can occur such as a dead rabbit giving birth
 
         'async' - Agents always use the most up to date information on which
-        to base their decsisons. 
+        to base their decsisons.
 
     """
     env = environment.environment(size, mode)
