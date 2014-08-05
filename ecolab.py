@@ -12,7 +12,7 @@ def agent_solve(env):
         # Update old_pos in each agent's message dictionary
         # so that it contains position from previous iteration
         for agent in env.agents:
-            agent.messages['old_pos'] = agent.pos
+            agent.messages.pos = agent.pos
 
         # Apply rules
         for agent in env.agents:

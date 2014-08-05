@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.random import rand
+from messages import message
 
 
 class fox:
@@ -22,7 +23,7 @@ class fox:
         self.has_been_eaten = False       # Has this agent been eaten?
 
         # Messages passed to this agent
-        self.messages = {}
+        self.messages = message()
 
         # Incremenent number of alive foxes by one 
         self.__class__.num_foxes = self.__class__.num_foxes + 1
@@ -57,7 +58,7 @@ class fox:
         # Foxes are given infinite distance so that they are never considered
         if env.mode =='sync':
         # syncronous mode - use state of rabbit from previous iteration by using the messages dictionary
-            pos_array = (np.array([agent.messages['old_pos'] if isinstance(agent, rabbit)
+            pos_array = (np.array([agent.messages.pos if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
         elif env.mode == 'async':
             pos_array = (np.array([agent.pos if isinstance(agent, rabbit) and not agent.dead and not agent.has_been_eaten
@@ -89,8 +90,8 @@ class fox:
 
             if pk > rand():
                 if env.mode =='sync':
-                    # Move to position of rabbit in previous iteration
-                    self.pos = env.agents[nearest_rabbit_ind].messages['old_pos']
+                    # Move to position of rabbit in previous iteration using its message class
+                    self.pos = env.agents[nearest_rabbit_ind].messages.pos
                     # kill rabbit. Do not decrement the number of rabbits because, in this mode
                     # It is possible for the same rabbit to be eaten twice as per the MATLAB original
                     env.agents[nearest_rabbit_ind].has_been_eaten = True
@@ -158,7 +159,7 @@ class rabbit:
         self.has_been_eaten = False      # Has this agent been eaten?
 
         # Messages passed to this agent
-        self.messages = {}
+        self.messages = message()
 
         # We've created a new instance so increment the counter
         self.__class__.num_rabbits = self.__class__.num_rabbits + 1

@@ -90,7 +90,7 @@ class FoxTests(unittest.TestCase):
         # create a rabbit very close to it
         env.agents = [agents.rabbit(age=2, food=10, pos=[1.52,1.52], speed=10, last_breed=7)]
         #Set the previous position of rabbit to be [1.52,1.52]
-        env.agents[0].messages['old_pos'] = [1.52, 1.52]
+        env.agents[0].messages.pos = [1.52, 1.52]
         # Its almost certain that this fox ate this rabbit
         fox.eat(env)
         # Doex rabbit know that its been eaten?
