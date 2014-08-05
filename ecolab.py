@@ -1,6 +1,7 @@
 from agents import rabbit, fox
 import environment
 import numpy as np
+from messages import message
 
 
 def agent_solve(env):
@@ -100,7 +101,7 @@ def ecolab(size, nr, nf, steps, mode='sync'):
     mode: string (default='sync')
         Simulation mode, either 'sync' or 'async'
         'sync' - Agents use information on previous iteration on which to
-        base their decisions. This gives the same results as MATLAB.
+        base their decisions. This gives the same results as the MATLAB original.
         Some unphysical events can occur such as a dead rabbit giving birth
 
         'async' - Agents always use the most up to date information on which
@@ -111,6 +112,11 @@ def ecolab(size, nr, nf, steps, mode='sync'):
     env.create_agents(nr, nf, 'joined')
 
     history = np.zeros((2, steps))
+
+    #Initialise messages if mode is 'sync'
+    if mode=='sync':
+        for agent in env.agents:
+            agent.messages = message(agent.pos, agent.dead)
 
     for n_it in range(steps):
         history[0, n_it] = rabbit.num_rabbits
