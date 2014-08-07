@@ -3,6 +3,26 @@ import environment
 import numpy as np
 from messages import message
 
+def update_messages(env):
+        # Update messages for each agent
+        for agent in env.agents:
+            agent.messages.pos = agent.pos
+            agent.messages.dead = agent.dead
+
+        # Clean up the dead
+        num_rabbit_dead = 0
+        for agent in env.agents:
+            if isinstance(agent, rabbit) and (agent.messages.dead or agent.has_been_eaten):
+                num_rabbit_dead = num_rabbit_dead + 1
+
+        # Create new liist that only contains the living
+        env.agents = ([a for a in env.agents if not a.dead and
+                      not a.has_been_eaten])
+
+        # Update counters
+        rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_dead
+
+
 
 def agent_solve(env):
     """Runs one iteration of the simulation.
@@ -10,11 +30,6 @@ def agent_solve(env):
     new_agents = []  # List of new agents created for this iteration
 
     if env.mode == 'sync':
-        # Update old_pos in each agent's message dictionary
-        # so that it contains position from previous iteration
-        for agent in env.agents:
-            agent.messages.pos = agent.pos
-
         # Apply rules
         for agent in env.agents:
             eaten = agent.eat(env)
@@ -35,22 +50,8 @@ def agent_solve(env):
         # Add new agents to list
         env.agents.extend(new_agents)
 
-        # Clean up the dead
-        # First, how many have been eaten?
-        # Done here in order to emulate MATLAB results
-        num_rabbit_eaten = 0
-        for agent in env.agents:
-            if isinstance(agent, rabbit) and (agent.has_been_eaten and not
-                                              agent.dead):
-                num_rabbit_eaten = num_rabbit_eaten + 1
-        # Remove eaten and dead from the list of agents
-        env.agents = ([a for a in env.agents if not a.dead and
-                      not a.has_been_eaten])
-
-        # The starving and old are automatically accounted for in the
-        # .die() functions
-        # Only need to decrement total number of eaten rabbits
-        rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_eaten
+        # Update messages
+        update_messages(env)
 
     if env.mode == 'async':
         # Apply rules

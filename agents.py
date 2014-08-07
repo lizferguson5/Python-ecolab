@@ -203,14 +203,14 @@ class rabbit:
         # are older than maxage
         # If they've been eaten, they are dead 
         if self.food <= self.minfood or self.age > self.maxage:
-            self.dead = True
-            # async mode only:
-            # Only decrement counter if rabbit hasn't also been eaten
+            self.dead = True   
             if env.mode == 'async':
+                # Only decrement counter if rabbit hasn't also been eaten
                 if not self.has_been_eaten:
                     self.__class__.num_rabbits = self.__class__.num_rabbits - 1
             elif env.mode == 'sync':
-                self.__class__.num_rabbits = self.__class__.num_rabbits - 1
+                # In sync mode, we only update the dead message for this rabbit.
+                self.messages.dead = True
 
     def eat(self, env):
         # obtain environment food level at current location
