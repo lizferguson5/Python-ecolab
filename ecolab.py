@@ -8,6 +8,7 @@ def update_messages(env):
         for agent in env.agents:
             agent.messages.pos = agent.pos
             agent.messages.dead = agent.dead
+            agent.messages.has_been_eaten = agent.has_been_eaten
 
         # Clean up the dead
         num_rabbit_dead = 0
@@ -16,8 +17,8 @@ def update_messages(env):
                 num_rabbit_dead = num_rabbit_dead + 1
 
         # Create new liist that only contains the living
-        env.agents = ([a for a in env.agents if not a.dead and
-                      not a.has_been_eaten])
+        env.agents = ([a for a in env.agents if not a.messages.dead and
+                      not a.messages.has_been_eaten])
 
         # Update counters
         rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_dead
@@ -117,7 +118,7 @@ def ecolab(size, nr, nf, steps, mode='sync'):
     #Initialise messages if mode is 'sync'
     if mode=='sync':
         for agent in env.agents:
-            agent.messages = message(agent.pos, agent.dead)
+            agent.messages = message(agent.pos, agent.dead, agent.has_been_eaten)
 
     for n_it in range(steps):
         history[0, n_it] = rabbit.num_rabbits
