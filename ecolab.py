@@ -6,22 +6,26 @@ from messages import message
 def update_messages(env):
         # Update messages for each agent
         for agent in env.agents:
-            agent.messages.pos = agent.pos
-            agent.messages.dead = agent.dead
-            agent.messages.has_been_eaten = agent.has_been_eaten
+            agent.process_messages(env)
 
         # Clean up the dead
         num_rabbit_dead = 0
+        num_foxes_dead = 0
+        
         for agent in env.agents:
-            if isinstance(agent, rabbit) and (agent.messages.dead or agent.has_been_eaten):
+            if isinstance(agent, rabbit) and (agent.messages.dead or agent.messages.has_been_eaten):
                 num_rabbit_dead = num_rabbit_dead + 1
+            if isinstance(agent, fox) and (agent.messages.dead or agent.messages.has_been_eaten):
+                num_foxes_dead = num_foxes_dead + 1
 
-        # Create new liist that only contains the living
+
+        # Create new list that only contains the living
         env.agents = ([a for a in env.agents if not a.messages.dead and
                       not a.messages.has_been_eaten])
 
         # Update counters
         rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_dead
+        fox.num_foxes = fox.num_foxes - num_foxes_dead
 
 
 
@@ -43,7 +47,7 @@ def agent_solve(env):
             agent.die(env)
 
             # If the agent did not die, apply the breed rule
-            if not agent.dead:
+            if not agent.messages.dead:
                 new = agent.breed(env)
                 if new is not None:
                     new_agents.append(new)
@@ -114,11 +118,6 @@ def ecolab(size, nr, nf, steps, mode='sync'):
     env.create_agents(nr, nf, 'joined')
 
     history = np.zeros((2, steps))
-
-    #Initialise messages if mode is 'sync'
-    if mode=='sync':
-        for agent in env.agents:
-            agent.messages = message(agent.pos, agent.dead, agent.has_been_eaten)
 
     for n_it in range(steps):
         history[0, n_it] = rabbit.num_rabbits

@@ -23,17 +23,24 @@ class fox:
         self.has_been_eaten = False       # Has this agent been eaten?
 
         # Messages passed to this agent
-        self.messages = message()
+        self.messages = message(self.pos, self.dead, self.has_been_eaten)
 
         # Incremenent number of alive foxes by one 
         self.__class__.num_foxes = self.__class__.num_foxes + 1
 
     def __repr__(self):
-        out = ('Age : {0}\nFood : {1}\nPos : {2}\n\
+        out = ('Class(fox)\nAge : {0}\nFood : {1}\nPos : {2}\n\
                Speed: {3}\nlast_breed: {4}\n'.
                format(self.age, self.food, self.pos, self.speed,
                       self.last_breed))
         return(out)
+
+    def process_messages(self,env):
+        #If this agent died in this iteration, set its current state as dead
+        self.dead = self.messages.dead
+        self.has_been_eaten = self.messages.has_been_eaten
+        #Put position from this iteration into message
+        self.messages.pos = self.pos
 
     def breed(self,env):
         # Only breed if agent has enough food and enough time has elapsed
@@ -49,15 +56,14 @@ class fox:
         self.age = self.age + 1
         return(new)
 
-    def move_pos(self, new_pos):
-        # Sets new position of fox
-        self.pos = new_pos
+    def move_pos(self, new_pos,env):
+            self.pos = new_pos
 
     def find_food(self, env):
         # Get all positions of agents as a numpy array.
         # Foxes are given infinite distance so that they are never considered
         if env.mode =='sync':
-        # syncronous mode - use state of rabbit from previous iteration by using the messages dictionary
+        # syncronous mode - use state of rabbit from previous iteration by using messages
             pos_array = (np.array([agent.messages.pos if isinstance(agent, rabbit)
                        else [np.inf, np.inf] for agent in env.agents]))
         elif env.mode == 'async':
@@ -70,7 +76,7 @@ class fox:
         index = np.argmin(pos_array)
 
         # If the minimum distance found points to a fox,
-        # i.e. is infiite distance away, return -1
+        # i.e. is infinite distance away, return -1
         if np.isinf(pos_array[index]):
                     index = -1
         return(np.sqrt(pos_array[index]), index)
@@ -94,7 +100,7 @@ class fox:
                     self.pos = env.agents[nearest_rabbit_ind].messages.pos
                     # kill rabbit. Do not decrement the number of rabbits because, in this mode
                     # It is possible for the same rabbit to be eaten twice as per the MATLAB original
-                    env.agents[nearest_rabbit_ind].has_been_eaten = True
+                    env.agents[nearest_rabbit_ind].messages.has_been_eaten = True
                 elif env.mode == 'async':
                     # Move to current position of rabbit
                     self.pos = env.agents[nearest_rabbit_ind].pos
@@ -124,15 +130,18 @@ class fox:
             direc = direc + (np.pi/4)
 
         if mig:
-            self.move_pos(npos)
+            self.move_pos(npos,env)
 
     def die(self,env):
         # fox.die(self)
         # foxes die if their food level reaches zero or
         # they are older than max_age
         if self.food <= self.minfood or self.age > self.maxage:
-            self.dead = True
-            self.__class__.num_foxes = self.__class__.num_foxes - 1
+            if env.mode == 'async':
+                self.dead = True
+                self.__class__.num_foxes = self.__class__.num_foxes - 1
+            if env.mode == 'sync':
+                self.messages.dead = True
 
 
 class rabbit:
@@ -159,14 +168,25 @@ class rabbit:
         self.has_been_eaten = False      # Has this agent been eaten?
 
         # Messages passed to this agent
-        self.messages = message()
+        self.messages = message(self.pos, self.dead, self.has_been_eaten)
+        #Rabbit messages contain one extra element: cpos
+        self.messages.cpos = self.cpos
 
         # We've created a new instance so increment the counter
         self.__class__.num_rabbits = self.__class__.num_rabbits + 1
 
+    def process_messages(self,env):
+        #If this agent died in this iteration, set its current state as dead
+        self.dead = self.messages.dead
+        self.has_been_eaten = self.messages.has_been_eaten
+        #Put position from this iteration into message
+        self.messages.pos = self.pos
+        self.messages.cpos = self.cpos      
+
     def __repr__(self):
-        out = 'Age : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n'.\
-            format(self.age, self.food, self.pos, self.speed, self.last_breed)
+        out = 'Class(rabbit)\nAge : {0}\nFood : {1}\nPos : {2}\nSpeed: {3}\nlast_breed: {4}\n\
+            Dead: {5}'.\
+            format(self.age, self.food, self.pos, self.speed, self.last_breed,self.dead,self.messages.dead)
         return(out)
 
     def breed(self,env):
@@ -176,8 +196,8 @@ class rabbit:
         # In 'sync' mode, we replicate the original MATLAB code bugs
         if env.mode =='sync':
             if self.food >= self.foodbrd and self.last_breed >= self.brdfq:
-                new = rabbit(0, self.food/2.0, self.pos,  self.speed, 0)
-                self.food = self.food/2.0
+                new = rabbit(0, self.food / 2.0, self.pos,  self.speed, 0)
+                self.food = self.food / 2.0
                 self.last_breed = 0
             else:
                 self.last_breed = self.last_breed + 1
@@ -192,19 +212,19 @@ class rabbit:
         self.age = self.age + 1
         return(new)
 
-    def move_pos(self, new_pos):
+    def move_pos(self, new_pos,env):
         # Sets new position of rabbit.
-        self.pos = new_pos
-        self.cpos = np.round(self.pos).astype(np.int) - 1
+            self.pos = new_pos
+            self.cpos = np.round(self.pos).astype(np.int) - 1
 
     def die(self,env):
         # rabbit.die(self)
         # rabbits die if their food level reaches zero or they
         # are older than maxage
         # If they've been eaten, they are dead 
-        if self.food <= self.minfood or self.age > self.maxage:
-            self.dead = True   
+        if self.food <= self.minfood or self.age > self.maxage:  
             if env.mode == 'async':
+                self.dead = True
                 # Only decrement counter if rabbit hasn't also been eaten
                 if not self.has_been_eaten:
                     self.__class__.num_rabbits = self.__class__.num_rabbits - 1
@@ -289,4 +309,4 @@ class rabbit:
                 dir = dir + (np.pi/4)
 
         if mig:
-            self.move_pos(npos)
+            self.move_pos(npos,env)

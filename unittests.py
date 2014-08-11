@@ -12,7 +12,7 @@ class EnvironmentTests(unittest.TestCase):
         self.env = environment.environment(5)
 
     def testBMSize(self):
-        self.failUnless(self.env.bm_size==5)
+        self.failUnless(self.env.bm_size == 5)
 
 class MATLABTest1(unittest.TestCase):
     #Compares our results with the original MATLAB ecolab that was run with 
@@ -21,7 +21,7 @@ class MATLABTest1(unittest.TestCase):
 
     def setUp(self):
         numpy.random.seed(1)
-        self.env = environment.environment(10) #Create a 5 x 5 environment
+        self.env = environment.environment(10,mode='sync') #Create a 5 x 5 environment
         self.env.create_agents(30,2,'separate')
 
     def testRabbit1(self):
@@ -55,7 +55,6 @@ class MATLABtest2(unittest.TestCase):
         matlab_data = matlab_results['the_data']
 
         (agents,env,history) = ecolab.ecolab(size=20, nr=60, nf=5, steps=201)
-
         self.failUnless(all(history[0]==matlab_data[0]) and all(history[1]==matlab_data[1]),'Does not agree with MATLAB test data')
         
 
@@ -67,24 +66,40 @@ class FoxTests(unittest.TestCase):
         agents.rabbit.num_rabbits = 0
         agents.fox.num_foxes = 0
 
-    def testDieOld(self):
-        env = environment.environment(5)
+    def testDieOldAsync(self):
+        env = environment.environment(5,'async')
         #Create an old fox
         fox= agents.fox(age=1000, food=10, pos=[5.5,5.5], speed=2, last_breed=7)
         
         fox.die(env)
         self.failUnless(fox.dead)
         
-    def testDieStarve(self):
-        env = environment.environment(5)
+    def testDieStarveAsync(self):
+        env = environment.environment(5,'async')
         #Create a starving fox
         fox= agents.fox(age=2, food=-1, pos=[5.5,5.5], speed=2, last_breed=7)
         #Ensure that it knows that its time to die
         fox.die(env)
         self.failUnless(fox.dead)
 
-    def testEat1(self):
-        env = environment.environment(5)
+    def testDieOldSync(self):
+        env = environment.environment(5,'sync')
+        #Create an old fox
+        fox= agents.fox(age=1000, food=10, pos=[5.5,5.5], speed=2, last_breed=7)
+        
+        fox.die(env)
+        self.failUnless(fox.messages.dead)
+        
+    def testDieStarveSync(self):
+        env = environment.environment(5,'sync')
+        #Create a starving fox
+        fox= agents.fox(age=2, food=-1, pos=[5.5,5.5], speed=2, last_breed=7)
+        #Ensure that it knows that its time to die
+        fox.die(env)
+        self.failUnless(fox.messages.dead)
+
+    def testEat1Async(self):
+        env = environment.environment(5,'async')
         # Create a very fast fox
         fox = agents.fox(age=2, food=10, pos=[1.5,1.5], speed=10, last_breed=7)
         # create a rabbit very close to it
@@ -169,21 +184,37 @@ class RabbitTests(unittest.TestCase):
         self.assertEqual(self.rabbit.speed,[])
         self.assertEqual(self.rabbit.last_breed,[])
 
-    def testDieOld(self):
-        env = environment.environment(10)
+    def testDieOldAsync(self):
+        env = environment.environment(10,'async')
         # Create an old rabbit
         rabbit= agents.rabbit(age=1000,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
         # Ensure that it knows that its time to die
         rabbit.die(env)
         self.failUnless(rabbit.dead,'Ancient rabbit did not die')
 
-    def testDieStarve(self):
-        env = environment.environment(10)
+    def testDieOldSync(self):
+        env = environment.environment(10,'sync')
+        # Create an old rabbit
+        rabbit= agents.rabbit(age=1000,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
+        # Ensure that it knows that its time to die
+        rabbit.die(env)
+        self.failUnless(rabbit.messages.dead,'Ancient rabbit did not die')
+
+    def testDieStarveAsync(self):
+        env = environment.environment(10,'async')
         # Create a starving fox
         rabbit= agents.rabbit(age=2,food=-1,pos=[5.5,5.5],speed=2,last_breed=7)
         # Ensure that it knows that its time to die
         rabbit.die(env)
         self.failUnless(rabbit.dead,'Starved rabbit did not die')
+
+    def testDieStarveSync(self):
+        env = environment.environment(10,'sync')
+        # Create a starving fox
+        rabbit= agents.rabbit(age=2,food=-1,pos=[5.5,5.5],speed=2,last_breed=7)
+        # Ensure that it knows that its time to die
+        rabbit.die(env)
+        self.failUnless(rabbit.messages.dead,'Starved rabbit did not die')
 
     def testDieDoubleCount(self):
         # Ensure that we don't decrement rabbit counter twice
@@ -266,7 +297,7 @@ class RabbitTests(unittest.TestCase):
 
     def testMigrateWhenFoodAvailable(self):
         #Does a rabbit at (5.5,5.5) migrate to the same position as the MATLAB version given that food is available
-        self.env= environment.environment(10)
+        self.env= environment.environment(10,mode='sync')
         numpy.random.seed(1) #MMigrate uses random numbers so need to seed to get reproducable results
         
         rabbit= agents.rabbit(age=2,food=10,pos=[5.5,5.5],speed=2,last_breed=7)
@@ -278,7 +309,7 @@ class RabbitTests(unittest.TestCase):
         #Does a rabbit at (9.8,9.8) migrate to the same posiiton as the MATLAV version given that no food is available
         numpy.random.seed(1) #MMigrate uses random numbers so need to seed to get reproducable results
         
-        self.env= environment.environment(10)
+        self.env= environment.environment(10,mode='sync')
         self.env.food= numpy.zeros((10,10)) #Eat all the food
         rabbit= agents.rabbit(age=2,food=10,pos=[9.8,9.8],speed=2,last_breed=7)
         rabbit.migrate(self.env)
