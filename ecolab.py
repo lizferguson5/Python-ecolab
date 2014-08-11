@@ -114,6 +114,10 @@ def ecolab(size, nr, nf, steps, mode='sync'):
         to base their decsisons.
 
     """
+    #Ensure that numbers of rabbits and foxes are zero'd for this simulation
+    rabbit.num_rabbits = 0
+    fox.num_foxes = 0
+
     env = environment.environment(size, mode)
     env.create_agents(nr, nf, 'joined')
 
