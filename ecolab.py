@@ -8,26 +8,13 @@ def update_messages(env):
         for agent in env.agents:
             agent.process_messages(env)
 
-        # Clean up the dead
-        num_rabbit_dead = 0
-        num_foxes_dead = 0
-        
-        for agent in env.agents:
-            if isinstance(agent, rabbit) and (agent.messages.dead or agent.messages.has_been_eaten):
-                num_rabbit_dead = num_rabbit_dead + 1
-            if isinstance(agent, fox) and (agent.messages.dead or agent.messages.has_been_eaten):
-                num_foxes_dead = num_foxes_dead + 1
-
-
         # Create new list that only contains the living
         env.agents = ([a for a in env.agents if not a.messages.dead and
                       not a.messages.has_been_eaten])
 
         # Update counters
-        rabbit.num_rabbits = rabbit.num_rabbits - num_rabbit_dead
-        fox.num_foxes = fox.num_foxes - num_foxes_dead
-
-
+        rabbit.num_rabbits = sum([isinstance(agent,rabbit) for agent in env.agents])
+        fox.num_foxes = sum([isinstance(agent,fox) for agent in env.agents])
 
 def agent_solve(env):
     """Runs one iteration of the simulation.
