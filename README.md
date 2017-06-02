@@ -3,6 +3,12 @@ Python-ecolab
 
 Python port of Dawn Walker's ecolab code.
 
+### Citation
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.802099.svg)](https://doi.org/10.5281/zenodo.802099)
+
+Mike Croucher, & Dawn Walker. (2017, June 2). mikecroucher/Python-ecolab: Initial release. Zenodo. http://doi.org/10.5281/zenodo.802099
+
 ### Files list
 
 * **agents.py** - Definitions of the fox and rabbit classes
